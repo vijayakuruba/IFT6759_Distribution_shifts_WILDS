@@ -5,7 +5,7 @@ import numpy as np
 import torch
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
-from transformers import BertTokenizerFast, DistilBertTokenizerFast
+#from transformers import BertTokenizerFast, DistilBertTokenizerFast
 
 from data_augmentation.randaugment import FIX_MATCH_AUGMENTATION_POOL, RandAugment
 
