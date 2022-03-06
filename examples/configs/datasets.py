@@ -249,7 +249,7 @@ dataset_defaults = {
         'n_groups_per_batch': 2,
         #'unlabeled_n_groups_per_batch': 2,
         'irm_lambda': 1.,
-        #'coral_penalty_weight': 10.,
+        'coral_penalty_weight': 10.,
         #'dann_penalty_weight': 0.1,
         #'dann_featurizer_lr': 3e-6,
         #'dann_classifier_lr': 3e-5,
