@@ -8,7 +8,7 @@ import torchvision.transforms.functional as TF
 #from transformers import BertTokenizerFast, DistilBertTokenizerFast
 
 from data_augmentation.randaugment import FIX_MATCH_AUGMENTATION_POOL, RandAugment
-
+from data_augmentation.cutout_augment.cutoutaugment import CutoutAugment
 
 _DEFAULT_IMAGE_TENSOR_NORMALIZATION_MEAN = [0.485, 0.456, 0.406]
 _DEFAULT_IMAGE_TENSOR_NORMALIZATION_STD = [0.229, 0.224, 0.225]
@@ -72,6 +72,10 @@ def initialize_transform(
             )
     elif additional_transform_name == "weak":
         transform = add_weak_transform(
+            config, dataset, transform_steps, normalize, default_normalization
+        )
+    elif additional_transform_name == "cutout":
+        transform = add_cutout_transform(
             config, dataset, transform_steps, normalize, default_normalization
         )
     else:
@@ -242,6 +246,23 @@ def add_rand_augment_transform(config, dataset, base_transform_steps, normalizat
         ]
     )
     return transforms.Compose(strong_transform_steps)
+
+def add_cutout_transform(config, dataset, base_transform_steps, should_normalize, normalization):
+    # Adapted from https://github.com/YBZh/Bridging_UDA_SSL
+    target_resolution = _get_target_resolution(config, dataset)
+    cutout_transform_steps = copy.deepcopy(base_transform_steps)
+    cutout_transform_steps.extend(
+        [
+            transforms.RandomCrop(
+                size=target_resolution
+            ),
+            CutoutAugment(),
+        ]
+    )
+    if should_normalize:
+        cutout_transform_steps.append(transforms.ToTensor())
+        cutout_transform_steps.append(normalization)
+    return transforms.Compose(cutout_transform_steps)  
 
 #def poverty_rgb_color_transform(ms_img, transform):
 #    from wilds.datasets.poverty_dataset import _MEANS_2009_17, _STD_DEVS_2009_17
