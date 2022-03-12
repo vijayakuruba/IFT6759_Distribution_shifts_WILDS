@@ -55,7 +55,7 @@ class WILDSDataset:
         """
         raise NotImplementedError
 
-    def get_subset(self, split, frac=1.0, transform=None):
+    def get_subset(self, split, frac=1.0, transform=None, do_transform_y=False):
         """
         Args:
             - split (str): Split identifier, e.g., 'train', 'val', 'test'.

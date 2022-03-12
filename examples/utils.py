@@ -321,6 +321,8 @@ def move_to(obj, device):
         return {k: move_to(v, device) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [move_to(v, device) for v in obj]
+    elif isinstance(obj, tuple):
+        return tuple([move_to(v, device) for v in obj])
     elif isinstance(obj, float) or isinstance(obj, int):
         return obj
     else:
@@ -335,6 +337,8 @@ def detach_and_clone(obj):
         return {k: detach_and_clone(v) for k, v in obj.items()}
     elif isinstance(obj, list):
         return [detach_and_clone(v) for v in obj]
+    elif isinstance(obj, tuple):
+        return tuple([detach_and_clone(v) for v in obj])
     elif isinstance(obj, float) or isinstance(obj, int):
         return obj
     else:

@@ -45,6 +45,8 @@ class SingleModelAlgorithm(GroupAlgorithm):
             no_group_logging=config.no_group_logging,
         )
         self.model = model
+        self.mixcut = config.mixcut
+
 
     def get_model_output(self, x, y_true):
         if self.model.needs_y:
@@ -67,23 +69,32 @@ class SingleModelAlgorithm(GroupAlgorithm):
                 - y_true (Tensor): ground truth labels for batch
                 - g (Tensor): groups for batch
                 - metadata (Tensor): metadata for batch
-                - y_pred (Tensor): model output for batch 
+                - y_pred (Tensor): model output for batch
                 - unlabeled_g (Tensor): groups for unlabeled batch
                 - unlabeled_metadata (Tensor): metadata for unlabeled batch
                 - unlabeled_features (Tensor): features for unlabeled batch
         """
         x, y_true, metadata = batch
+        if self.mixcut > 0  and self.is_training:
+            targets, tmp, tmp2 = y_true.chunk(3)
+            targets = torch.squeeze(targets, 0)
+        else:
+            targets = y_true
         x = move_to(x, self.device)
+        targets = move_to(targets, self.device)
         y_true = move_to(y_true, self.device)
+
         g = move_to(self.grouper.metadata_to_group(metadata), self.device)
 
-        outputs = self.get_model_output(x, y_true)
+        outputs = self.get_model_output(x, targets)
 
         results = {
             'g': g,
-            'y_true': y_true,
+            'y_true': targets,
             'y_pred': outputs,
             'metadata': metadata,
+            'mixcut_y': y_true
+
         }
         #if unlabeled_batch is not None:
         #    x, metadata = unlabeled_batch

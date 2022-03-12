@@ -51,6 +51,7 @@ class DeepCORAL(SingleModelAlgorithm):
         # set model components
         self.featurizer = featurizer
         self.classifier = classifier
+        self.mixcut = config.mixcut
 
     def coral_penalty(self, x, y):
         if x.dim() > 2:
@@ -88,13 +89,22 @@ class DeepCORAL(SingleModelAlgorithm):
         """
         # forward pass
         x, y_true, metadata = batch
+        if self.mixcut > 0  and self.is_training:
+            targets, tmp, tmp2 = y_true.chunk(3)
+            targets = torch.squeeze(targets, 0)
+        else:
+            targets = y_true
+
+        targets = targets.to(self.device)
         y_true = y_true.to(self.device)
+
         g = self.grouper.metadata_to_group(metadata).to(self.device)
 
         results = {
             'g': g,
-            'y_true': y_true,
+            'y_true': targets,
             'metadata': metadata,
+            'mixcut_y': y_true
         }
 
         #if unlabeled_batch is not None:
@@ -106,7 +116,7 @@ class DeepCORAL(SingleModelAlgorithm):
         x = x.to(self.device)
         features = self.featurizer(x)
         outputs = self.classifier(features)
-        y_pred = outputs[: len(y_true)]
+        y_pred = outputs[: len(targets)]
 
         results['features'] = features
         results['y_pred'] = y_pred
@@ -131,6 +141,8 @@ class DeepCORAL(SingleModelAlgorithm):
         else:
             penalty = 0.
 
+        loss = self.loss['loss'] if self.is_training else self.loss['eval_loss']
+        results_y = results['mixcut_y'] if self.is_training else results['y_true']
         self.save_metric_for_logging(results, 'penalty', penalty)
-        avg_loss = self.loss.compute(results['y_pred'], results['y_true'], return_dict=False)
+        avg_loss = loss.compute(results['y_pred'], results_y, return_dict=False)
         return avg_loss + penalty * self.penalty_weight

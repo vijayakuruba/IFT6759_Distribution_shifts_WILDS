@@ -3,6 +3,7 @@ from typing import List
 
 import numpy as np
 import torch
+import random
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 #from transformers import BertTokenizerFast, DistilBertTokenizerFast
@@ -65,7 +66,7 @@ def initialize_transform(
         transformations = add_fixmatch_transform(
                 config, dataset, transform_steps, default_normalization
             )
-        transform = MultipleTransforms(transformations)    
+        transform = MultipleTransforms(transformations)
     elif additional_transform_name == "randaugment":
         transform = add_rand_augment_transform(
                 config, dataset, transform_steps, default_normalization
@@ -262,7 +263,8 @@ def add_cutout_transform(config, dataset, base_transform_steps, should_normalize
     if should_normalize:
         cutout_transform_steps.append(transforms.ToTensor())
         cutout_transform_steps.append(normalization)
-    return transforms.Compose(cutout_transform_steps)  
+    return transforms.Compose(cutout_transform_steps)
+
 
 #def poverty_rgb_color_transform(ms_img, transform):
 #    from wilds.datasets.poverty_dataset import _MEANS_2009_17, _STD_DEVS_2009_17

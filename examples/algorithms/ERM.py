@@ -16,6 +16,7 @@ class ERM(SingleModelAlgorithm):
             metric=metric,
             n_train_steps=n_train_steps,
         )
+        self.mixcut = config.mixcut
         #self.use_unlabeled_y = config.use_unlabeled_y # Expect x,y,m from unlabeled loaders and train on the unlabeled y
 
     def process_batch(self, batch, unlabeled_batch=None):
@@ -30,31 +31,38 @@ class ERM(SingleModelAlgorithm):
                 - y_true (Tensor): ground truth labels for batch
                 - g (Tensor): groups for batch
                 - metadata (Tensor): metadata for batch
-                - y_pred (Tensor): model output for batch 
+                - y_pred (Tensor): model output for batch
                 - unlabeled_g (Tensor): groups for unlabeled batch
                 - unlabeled_metadata (Tensor): metadata for unlabeled batch
                 - unlabeled_y_pred (Tensor): predictions for unlabeled batch for fully-supervised ERM experiments
                 - unlabeled_y_true (Tensor): true labels for unlabeled batch for fully-supervised ERM experiments
         """
         x, y_true, metadata = batch
+        if self.mixcut > 0  and self.is_training:
+            targets, tmp, tmp2 = y_true.chunk(3)
+            targets = torch.squeeze(targets, 0)
+        else:
+            targets = y_true
         x = move_to(x, self.device)
+        targets = move_to(targets, self.device)
         y_true = move_to(y_true, self.device)
         g = move_to(self.grouper.metadata_to_group(metadata), self.device)
 
-        outputs = self.get_model_output(x, y_true)
+        outputs = self.get_model_output(x, targets)
 
         results = {
             'g': g,
-            'y_true': y_true,
+            'y_true': targets,
             'y_pred': outputs,
             'metadata': metadata,
+            'mixcut_y': y_true
         }
         #if unlabeled_batch is not None:
         #    if self.use_unlabeled_y: # expect loaders to return x,y,m
         #        x, y, metadata = unlabeled_batch
         #        y = move_to(y, self.device)
         #    else:
-        #        x, metadata = unlabeled_batch    
+        #        x, metadata = unlabeled_batch
         #    x = move_to(x, self.device)
         #    results['unlabeled_metadata'] = metadata
         #    if self.use_unlabeled_y:
@@ -64,11 +72,13 @@ class ERM(SingleModelAlgorithm):
         return results
 
     def objective(self, results):
-        labeled_loss = self.loss.compute(results['y_pred'], results['y_true'], return_dict=False)
+        loss = self.loss['loss'] if self.is_training else self.loss['eval_loss']
+        results_y = results['mixcut_y'] if self.is_training else results['y_true']
+        labeled_loss = loss.compute(results['y_pred'], results_y, return_dict=False)
         #if self.use_unlabeled_y and 'unlabeled_y_true' in results:
         #    unlabeled_loss = self.loss.compute(
-        #        results['unlabeled_y_pred'], 
-        #        results['unlabeled_y_true'], 
+        #        results['unlabeled_y_pred'],
+        #        results['unlabeled_y_true'],
         #        return_dict=False
         #    )
         #    lab_size = len(results['y_pred'])

@@ -97,7 +97,7 @@ def CutoutAbs(img, v):  # [0, 60] => percentage: [0, 0.2]
 
     x0 = int(max(0, x_center - v / 2.0))
     y0 = int(max(0, y_center - v / 2.0))
-    x1 = min(w, x0 + v) 
+    x1 = min(w, x0 + v)
     y1 = min(h, y0 + v)
 
     xy = (x0, y0, x1, y1)
@@ -135,7 +135,7 @@ class RandAugment:
         self.n = n
         self.augmentation_pool = augmentation_pool
 
-    def __call__(self, img):
+    def __call__(self, img, label=None):
         ops = [
             self.augmentation_pool[torch.randint(len(self.augmentation_pool), (1,))]
             for _ in range(self.n)

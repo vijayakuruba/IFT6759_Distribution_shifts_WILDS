@@ -82,9 +82,15 @@ class Metric:
         Output (return_dict=True):
             - results (dict): Dictionary of results, mapping metric.agg_metric_field to avg_metric
         """
-        if numel(y_true) == 0:
+        if torch.is_tensor(y_true) and numel(y_true) == 0:
             if hasattr(y_true, 'device'):
                 agg_metric = torch.tensor(0., device=y_true.device)
+            else:
+                agg_metric = torch.tensor(0.)
+        #here put case for as_tuple
+        elif not torch.is_tensor(y_true):
+            if hasattr(y_true[0], 'device'):
+                agg_metric = torch.tensor(0., device=y_true[0].device)
             else:
                 agg_metric = torch.tensor(0.)
         else:
@@ -216,7 +222,10 @@ class ElementwiseMetric(Metric):
 
     def compute_flattened(self, y_pred, y_true, return_dict=True):
         flattened_metrics = self.compute_element_wise(y_pred, y_true, return_dict=False)
-        index = torch.arange(y_true.numel())
+        if torch.is_tensor(y_true):
+            index = torch.arange(y_true.numel())
+        else:
+            index = torch.arange(y_true[0].numel())
         if return_dict:
             return {self.name: flattened_metrics, 'index': index}
         else:

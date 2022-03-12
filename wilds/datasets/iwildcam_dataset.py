@@ -153,7 +153,7 @@ class IWildCamDataset(WILDSDataset):
         """
 
         # All images are in the train folder
-        img_path = self.data_dir / 'train' / self._input_array[idx]
+        img_path = self.data_dir / 'train' / self._input_array[idx]#'8a0a5b8c-21bc-11ea-a13a-137349068a90.jpg'
         img = Image.open(img_path)
 
         return img

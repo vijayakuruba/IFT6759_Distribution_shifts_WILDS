@@ -4,6 +4,9 @@ from algorithms.algorithm import Algorithm
 from utils import update_average
 from scheduler import step_scheduler
 from wilds.common.utils import get_counts, numel
+from wilds.common.metrics.loss import Loss
+from wilds.common.metrics.all_metrics import Accuracy
+
 
 class GroupAlgorithm(Algorithm):
     """
@@ -45,17 +48,22 @@ class GroupAlgorithm(Algorithm):
         batch_log = {}
         with torch.no_grad():
             for m in self.logged_metrics:
+                if (self.is_training and type(m) is not Accuracy):
+                    m=m.get('loss')
+                elif type(m) is not Accuracy:
+                    m=m.get('eval_loss')
+                results_y = results['mixcut_y'] if self.is_training else results['y_true']
                 if not self.no_group_logging:
                     group_metrics, group_counts, worst_group_metric = m.compute_group_wise(
                         results['y_pred'],
-                        results['y_true'],
+                        results_y,
                         results['g'],
                         self.grouper.n_groups,
                         return_dict=False)
                     batch_log[f'{self.group_prefix}{m.name}'] = group_metrics
                 batch_log[m.agg_metric_field] = m.compute(
                     results['y_pred'],
-                    results['y_true'],
+                    results_y,
                     return_dict=False).item()
             count = numel(results['y_true'])
 
@@ -96,6 +104,7 @@ class GroupAlgorithm(Algorithm):
         Sanitizes the internal log (Algorithm.log_dict) and outputs it.
         """
         sanitized_log = {}
+        loss = self.loss['loss'] if self.is_training else self.loss['eval_loss']
         for k, v in self.log_dict.items():
             if k.startswith(self.group_prefix):
                 field = k[len(self.group_prefix):]
@@ -110,11 +119,15 @@ class GroupAlgorithm(Algorithm):
                     # in practice, it is saving each value as {field}_group:{g}
                     added = False
                     for m in self.logged_metrics:
+                        if (self.is_training and type(m) is not Accuracy):
+                            m=m.get('loss')
+                        elif type(m) is not Accuracy:
+                            m=m.get('eval_loss')
                         if field==m.name:
                             sanitized_log[m.group_metric_field(g)] = outval
                             added = True
                     if k==self.group_count_field:
-                        sanitized_log[self.loss.group_count_field(g)] = outval
+                        sanitized_log[loss.group_count_field(g)] = outval
                         added = True
                     elif not added:
                         sanitized_log[f'{field}_group:{g}'] = outval
@@ -191,6 +204,10 @@ class GroupAlgorithm(Algorithm):
 
         # Process aggregate logged metrics
         for metric in self.logged_metrics:
+            if (self.is_training and type(metric) is not Accuracy):
+                metric=metric.get('loss')
+            elif type(metric) is not Accuracy:
+                metric=metric.get('eval_loss')
             results_str += (
                 f'{metric.agg_metric_field}: {log[metric.agg_metric_field]:.3f}\n'
             )
@@ -219,6 +236,10 @@ class GroupAlgorithm(Algorithm):
 
                 # Process grouped metric fields
                 for metric in self.logged_metrics:
+                    if (self.is_training and type(metric) is not Accuracy):
+                        metric=metric.get('loss')
+                    elif type(metric) is not Accuracy:
+                        metric=metric.get('eval_loss')
                     results_str += (
                         f'{metric.name}: '
                         f'{log[metric.group_metric_field(g)]:5.3f}\t'

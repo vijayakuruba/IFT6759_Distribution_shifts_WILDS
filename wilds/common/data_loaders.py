@@ -2,9 +2,15 @@ import numpy as np
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import WeightedRandomSampler, SubsetRandomSampler
 from wilds.common.utils import get_counts, split_into_groups
+import sys
+import os
+path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+path = os.path.join(path, 'examples/data_augmentation')
+sys.path.append(path)
+from mixcut_augment.mixcutaugment import MixcutCollator
 
 def get_train_loader(loader, dataset, batch_size,
-        uniform_over_groups=None, grouper=None, distinct_groups=True, n_groups_per_batch=None, **loader_kwargs):
+        uniform_over_groups=None, grouper=None, distinct_groups=True, n_groups_per_batch=None, mixcut=0, **loader_kwargs):
     """
     Constructs and returns the data loader for training.
     Args:
@@ -25,13 +31,16 @@ def get_train_loader(loader, dataset, batch_size,
     Output:
         - data loader (DataLoader): Data loader.
     """
+    collate_fn = dataset.collate
+    if mixcut:
+        collate_fn = MixcutCollator(mixcut)
     if loader == 'standard':
         if uniform_over_groups is None or not uniform_over_groups:
             return DataLoader(
                 dataset,
                 shuffle=True, # Shuffle training dataset
                 sampler=None,
-                collate_fn=dataset.collate,
+                collate_fn=collate_fn,
                 batch_size=batch_size,
                 **loader_kwargs)
         else:
@@ -48,7 +57,7 @@ def get_train_loader(loader, dataset, batch_size,
                 dataset,
                 shuffle=False, # The WeightedRandomSampler already shuffles
                 sampler=sampler,
-                collate_fn=dataset.collate,
+                collate_fn=collate_fn,
                 batch_size=batch_size,
                 **loader_kwargs)
 
@@ -71,7 +80,7 @@ def get_train_loader(loader, dataset, batch_size,
         return DataLoader(dataset,
               shuffle=None,
               sampler=None,
-              collate_fn=dataset.collate,
+              collate_fn=collate_fn,
               batch_sampler=batch_sampler,
               drop_last=False,
               **loader_kwargs)

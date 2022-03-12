@@ -170,6 +170,9 @@ class Accuracy(ElementwiseMetric):
     def _compute_element_wise(self, y_pred, y_true):
         if self.prediction_fn is not None:
             y_pred = self.prediction_fn(y_pred)
+        if isinstance(y_true, tuple):
+            y_true = y_true[0]
+
         return (y_pred==y_true).float()
 
     def worst(self, metrics):

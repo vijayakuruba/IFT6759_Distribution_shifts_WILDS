@@ -33,7 +33,7 @@ from PIL import ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 def main():
-    
+
     ''' Arg defaults are filled in according to examples/configs/ '''
     parser = argparse.ArgumentParser()
 
@@ -56,7 +56,7 @@ def main():
     # Unlabeled Dataset
     #parser.add_argument('--unlabeled_split', default=None, type=str, choices=wilds.unlabeled_splits,  help='Unlabeled split to use. Some datasets only have some splits available.')
     #parser.add_argument('--unlabeled_version', default=None, type=str, help='WILDS unlabeled dataset version number.')
-    #parser.add_argument('--use_unlabeled_y', default=False, type=parse_bool, const=True, nargs='?', 
+    #parser.add_argument('--use_unlabeled_y', default=False, type=parse_bool, const=True, nargs='?',
     #                    help='If true, unlabeled loaders will also the true labels for the unlabeled data. This is only available for some datasets. Used for "fully-labeled ERM experiments" in the paper. Correct functionality relies on CrossEntropyLoss using ignore_index=-100.')
 
     # Loaders
@@ -101,6 +101,7 @@ def main():
     parser.add_argument('--groupby_fields', nargs='+')
     parser.add_argument('--group_dro_step_size', type=float)
     parser.add_argument('--coral_penalty_weight', type=float)
+    parser.add_argument('--mixcut', type=float, default=0.0)
     #parser.add_argument('--dann_penalty_weight', type=float)
     #parser.add_argument('--dann_classifier_lr', type=float)
     #parser.add_argument('--dann_featurizer_lr', type=float)
@@ -304,9 +305,9 @@ def main():
     #        del teacher_model
     #    else:
     #        unlabeled_split_dataset = full_unlabeled_dataset.get_subset(
-    #            split, 
-    #            transform=unlabeled_train_transform, 
-    #            frac=config.frac, 
+    #            split,
+    #            transform=unlabeled_train_transform,
+    #            frac=config.frac,
     #            load_y=config.use_unlabeled_y
     #        )
 
@@ -347,7 +348,8 @@ def main():
         datasets[split]['dataset'] = full_dataset.get_subset(
             split,
             frac=config.frac,
-            transform=transform)
+            transform=transform,
+            do_transform_y = False) # change this to True to use transform returning x and y noni
 
         if split == 'train':
             datasets[split]['loader'] = get_train_loader(
@@ -358,6 +360,7 @@ def main():
                 grouper=train_grouper,
                 distinct_groups=config.distinct_groups,
                 n_groups_per_batch=config.n_groups_per_batch,
+                mixcut=config.mixcut,
                 **config.loader_kwargs)
         else:
             datasets[split]['loader'] = get_eval_loader(
@@ -434,7 +437,7 @@ def main():
             logger.write(
                 (f'\nUsing gradient_accumulation_steps {config.gradient_accumulation_steps} means that')
                 + (f' the effective labeled batch size is {config.batch_size * config.gradient_accumulation_steps}')
-                + (f' and the effective unlabeled batch size is {config.unlabeled_batch_size * config.gradient_accumulation_steps}') 
+                + (f' and the effective unlabeled batch size is {config.unlabeled_batch_size * config.gradient_accumulation_steps}')
                 #    if unlabeled_dataset and config.unlabeled_batch_size else '')
                 + ('. Updates behave as if torch loaders have drop_last=False\n')
             )

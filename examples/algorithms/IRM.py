@@ -5,6 +5,7 @@ from wilds.common.utils import split_into_groups
 import torch.autograd as autograd
 from wilds.common.metrics.metric import ElementwiseMetric, MultiTaskMetric
 from optimizer import initialize_optimizer
+import numpy as np
 
 class IRM(SingleModelAlgorithm):
     """
@@ -51,8 +52,9 @@ class IRM(SingleModelAlgorithm):
         self.scale = torch.tensor(1.).to(self.device).requires_grad_()
         self.update_count = 0
         self.config = config # Need to store config for IRM because we need to re-init optimizer
+        self.mixcut = config.mixcut
 
-        assert isinstance(self.loss, ElementwiseMetric) or isinstance(self.loss, MultiTaskMetric)
+        assert isinstance(self.loss['eval_loss'], ElementwiseMetric) or isinstance(self.loss['eval_loss'], MultiTaskMetric)
 
     def irm_penalty(self, losses):
         grad_1 = autograd.grad(losses[0::2].mean(), [self.scale], create_graph=True)[0]
@@ -70,10 +72,14 @@ class IRM(SingleModelAlgorithm):
         avg_loss = 0.
         penalty = 0.
 
+        loss = self.loss['loss'] if self.is_training else self.loss['eval_loss']
         for i_group in group_indices: # Each element of group_indices is a list of indices
-            group_losses, _ = self.loss.compute_flattened(
+            results_y = results['y_true'][i_group]
+            if self.is_training and self.mixcut :
+                results_y = torch.stack(list((results['mixcut_y'][0][i_group], results['mixcut_y'][1][i_group], results['mixcut_y'][2][i_group])), dim=0)
+            group_losses, _ = loss.compute_flattened(
                 self.scale * results['y_pred'][i_group],
-                results['y_true'][i_group],
+                results_y,
                 return_dict=False)
             if group_losses.numel()>0:
                 avg_loss += group_losses.mean()
