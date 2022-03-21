@@ -1,6 +1,6 @@
 import os
 import time
-
+import random
 import torch
 import numpy as np
 
@@ -55,13 +55,14 @@ class WILDSDataset:
         """
         raise NotImplementedError
 
-    def get_subset(self, split, frac=1.0, transform=None):
+    def get_subset(self, split, frac=1.0, frac_seed = 0, transform=None):
         """
         Args:
             - split (str): Split identifier, e.g., 'train', 'val', 'test'.
                            Must be in self.split_dict.
             - frac (float): What fraction of the split to randomly sample.
                             Used for fast development on a small dataset.
+            - frac_seed (int) : To set seed for the split                
             - transform (function): Any data transformations to be applied to the input x.
         Output:
             - subset (WILDSSubset): A (potentially subsampled) subset of the WILDSDataset.
@@ -75,6 +76,16 @@ class WILDSDataset:
         if frac < 1.0:
             # Randomly sample a fraction of the split
             num_to_retain = int(np.round(float(len(split_idx)) * frac))
+
+            #copied function from set_seed
+            """Sets seed"""
+            if torch.cuda.is_available():
+                torch.cuda.manual_seed(frac_seed)
+            torch.manual_seed(frac_seed)
+            np.random.seed(frac_seed)
+            random.seed(frac_seed)
+            torch.backends.cudnn.benchmark = False
+            torch.backends.cudnn.deterministic = True
             split_idx = np.sort(np.random.permutation(split_idx)[:num_to_retain])
 
         return WILDSSubset(self, split_idx, transform)

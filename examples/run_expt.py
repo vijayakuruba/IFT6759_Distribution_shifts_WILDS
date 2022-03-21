@@ -51,6 +51,8 @@ def main():
                         help='If true, tries to download the dataset if it does not exist in root_dir.')
     parser.add_argument('--frac', type=float, default=1.0,
                         help='Convenience parameter that scales all dataset splits down to the specified fraction, for development purposes. Note that this also scales the test set down, so the reported numbers are not comparable with the full test set.')
+    parser.add_argument('--frac_seed', type=int, default=0,
+                    help='Convenience parameter that seeds all dataset splits fractionings, for development purposes. This allows for reproductions of same dataset fractions for comparison.')
     parser.add_argument('--version', default=None, type=str, help='WILDS labeled dataset version number.')
 
     # Unlabeled Dataset
@@ -347,6 +349,7 @@ def main():
         datasets[split]['dataset'] = full_dataset.get_subset(
             split,
             frac=config.frac,
+            frac_seed=config.frac_seed,
             transform=transform)
 
         if split == 'train':
