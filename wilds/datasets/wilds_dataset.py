@@ -55,7 +55,7 @@ class WILDSDataset:
         """
         raise NotImplementedError
 
-    def get_subset(self, split, frac=1.0, transform=None, do_transform_y=False):
+    def get_subset(self, split, frac=1.0, frac_seed = 0, transform=None, do_transform_y=False):
         """
         Args:
             - split (str): Split identifier, e.g., 'train', 'val', 'test'.
@@ -75,6 +75,7 @@ class WILDSDataset:
         if frac < 1.0:
             # Randomly sample a fraction of the split
             num_to_retain = int(np.round(float(len(split_idx)) * frac))
+            np.random.seed(frac_seed)
             split_idx = np.sort(np.random.permutation(split_idx)[:num_to_retain])
 
         return WILDSSubset(self, split_idx, transform)
