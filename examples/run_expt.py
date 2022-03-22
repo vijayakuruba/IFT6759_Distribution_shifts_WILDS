@@ -349,7 +349,7 @@ def main():
         datasets[split]['dataset'] = full_dataset.get_subset(
             split,
             frac=config.frac,
-            frac_seed=config.frac_seed,
+            #frac_seed=config.frac_seed,
             transform=transform)
 
         if split == 'train':
