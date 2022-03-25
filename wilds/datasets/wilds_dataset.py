@@ -78,14 +78,14 @@ class WILDSDataset:
             num_to_retain = int(np.round(float(len(split_idx)) * frac))
 
             #copied function from set_seed
-            """Sets seed"""
-            if torch.cuda.is_available():
-                torch.cuda.manual_seed(frac_seed)
-            torch.manual_seed(frac_seed)
+            #"""Sets seed"""
+            #if torch.cuda.is_available():
+            #    torch.cuda.manual_seed(frac_seed)
+            #torch.manual_seed(frac_seed)
             np.random.seed(frac_seed)
             random.seed(frac_seed)
-            torch.backends.cudnn.benchmark = False
-            torch.backends.cudnn.deterministic = True
+            #torch.backends.cudnn.benchmark = False
+            #torch.backends.cudnn.deterministic = True
             split_idx = np.sort(np.random.permutation(split_idx)[:num_to_retain])
 
         return WILDSSubset(self, split_idx, transform)
