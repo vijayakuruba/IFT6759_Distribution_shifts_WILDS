@@ -9,6 +9,7 @@ import torchvision.transforms.functional as TF
 
 from data_augmentation.randaugment import FIX_MATCH_AUGMENTATION_POOL, RandAugment
 from data_augmentation.cutout_augment.cutoutaugment import CutoutAugment
+from data_augmentation.weak_augment.weakaugment import WEAK_AUGMENTATION_POOL, WeakAugment
 
 _DEFAULT_IMAGE_TENSOR_NORMALIZATION_MEAN = [0.485, 0.456, 0.406]
 _DEFAULT_IMAGE_TENSOR_NORMALIZATION_STD = [0.229, 0.224, 0.225]
@@ -78,6 +79,10 @@ def initialize_transform(
         transform = add_cutout_transform(
             config, dataset, transform_steps, normalize, default_normalization
         )
+    elif additional_transform_name == "weak+":
+        transform = add_weakenhanced_transform(
+            config, dataset, transform_steps, default_normalization
+        )    
     else:
         if transform_name != "poverty":
             # The poverty data is already a tensor at this point
@@ -225,6 +230,26 @@ def add_weak_transform(config, dataset, base_transform_steps, should_normalize, 
     if should_normalize:
         weak_transform_steps.append(transforms.ToTensor())
         weak_transform_steps.append(normalization)
+    return transforms.Compose(weak_transform_steps)
+    
+def add_weakenhanced_transform(config, dataset, base_transform_steps, normalization):
+  
+    target_resolution = _get_target_resolution(config, dataset)
+    weak_transform_steps = copy.deepcopy(base_transform_steps)
+    weak_transform_steps.extend(
+        [
+            transforms.RandomHorizontalFlip(),
+            transforms.RandomCrop(
+                size=target_resolution
+            ),
+            WeakAugment(
+                
+                augmentation_pool=WEAK_AUGMENTATION_POOL,
+            ),
+            transforms.ToTensor(),
+            normalization,
+        ]
+    )
     return transforms.Compose(weak_transform_steps)
 
 def add_rand_augment_transform(config, dataset, base_transform_steps, normalization):
