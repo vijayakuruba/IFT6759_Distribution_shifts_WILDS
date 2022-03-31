@@ -19,7 +19,7 @@ algorithm_defaults = {
         'eval_loader': 'standard',
         'coral_penalty_weight': 1.,
         'randaugment_n': 2,
-        'additional_train_transform': 'randaugment',     # Apply strong augmentation to labeled & unlabeled examples
+        #'additional_train_transform': 'randaugment',     # Apply strong augmentation to labeled & unlabeled examples
     },
     'IRM': {
         'train_loader': 'group',
