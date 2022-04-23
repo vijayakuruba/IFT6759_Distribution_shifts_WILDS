@@ -274,18 +274,20 @@ def log_config(config, logger):
     logger.write('\n')
 
 def initialize_wandb(config):
-    if config.wandb_api_key_path is not None:
-        with open(config.wandb_api_key_path, "r") as f:
-            os.environ["WANDB_API_KEY"] = f.read().strip()
+    #if config.wandb_api_key_path is not None:
+    #    with open(config.wandb_api_key_path, "r") as f:
+    os.environ["WANDB_API_KEY"] = '3fec2349509f704e1e93037235bae3ca3e540dab'
 
     wandb.init(**config.wandb_kwargs)
     wandb.config.update(config)
 
-def save_pred(y_pred, path_prefix):
+def save_pred(y_pred,y_true, path_prefix):
     # Single tensor
     if torch.is_tensor(y_pred):
-        df = pd.DataFrame(y_pred.numpy())
-        df.to_csv(path_prefix + '.csv', index=False, header=False)
+      savedict = {'y_pred': y_pred.numpy(),
+                  'y_true':y_true.numpy()}
+      df = pd.DataFrame(savedict)  
+      df.to_csv(path_prefix + '.csv', index=False, header=True)
     # Dictionary
     elif isinstance(y_pred, dict) or isinstance(y_pred, list):
         torch.save(y_pred, path_prefix + '.pth')
