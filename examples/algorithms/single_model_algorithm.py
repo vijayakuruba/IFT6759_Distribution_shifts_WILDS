@@ -96,12 +96,7 @@ class SingleModelAlgorithm(GroupAlgorithm):
             'mixcut_y': y_true
 
         }
-        #if unlabeled_batch is not None:
-        #    x, metadata = unlabeled_batch
-        #    x = x.to(self.device)
-        #    results['unlabeled_metadata'] = metadata
-        #    results['unlabeled_features'] = self.featurizer(x)
-        #    results['unlabeled_g'] = self.grouper.metadata_to_group(metadata).to(self.device)
+
         return results
 
     def objective(self, results):

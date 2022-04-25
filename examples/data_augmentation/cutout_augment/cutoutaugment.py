@@ -31,19 +31,8 @@ def _sample_uniform(a, b):
 
 
 class CutoutAugment:
-    #def __init__(self):
-        #assert n >= 1, "RandAugment N has to be a value greater than or equal to 1."
-        #self.n = n
-        #self.augmentation_pool = augmentation_pool
 
     def __call__(self, img, label=None):
-        #ops = [
-        #    self.augmentation_pool[torch.randint(len(self.augmentation_pool), (1,))]
-        #    for _ in range(self.n)
-        #]
-        #for op, min_val, max_val in ops:
-        #    val = min_val + float(max_val - min_val) * _sample_uniform(0, 1)
-        #    img = op(img, val)
         cutout_val = _sample_uniform(0, 1) * 0.5
         img = Cutout(img, cutout_val)
         return img

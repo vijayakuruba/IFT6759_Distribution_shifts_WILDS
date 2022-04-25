@@ -1,6 +1,6 @@
 import os
 import time
-
+import random
 import torch
 import numpy as np
 
@@ -62,6 +62,7 @@ class WILDSDataset:
                            Must be in self.split_dict.
             - frac (float): What fraction of the split to randomly sample.
                             Used for fast development on a small dataset.
+            - frac_seed (int) : To set seed for the split
             - transform (function): Any data transformations to be applied to the input x.
         Output:
             - subset (WILDSSubset): A (potentially subsampled) subset of the WILDSDataset.
@@ -76,6 +77,7 @@ class WILDSDataset:
             # Randomly sample a fraction of the split
             num_to_retain = int(np.round(float(len(split_idx)) * frac))
             np.random.seed(frac_seed)
+            random.seed(frac_seed)
             split_idx = np.sort(np.random.permutation(split_idx)[:num_to_retain])
 
         return WILDSSubset(self, split_idx, transform)

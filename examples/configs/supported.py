@@ -41,13 +41,10 @@ algorithms = ['ERM', 'deepCORAL', 'IRM']
 
 # See transforms.py
 transforms = ['image_base', 'image_resize', 'image_resize_and_center_crop']
-additional_transforms = ['randaugment', 'weak', 'cutout']
+additional_transforms = ['randaugment', 'weak', 'cutout','weak+']
 
 # See models/initializer.py
-#models = ['resnet18_ms', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'wideresnet50',
-#         'densenet121', 'bert-base-uncased', 'distilbert-base-uncased',
-#         'gin-virtual', 'logistic_regression', 'code-gpt-py',
-#         'fasterrcnn', 'unet-seq']
+
 models = ['resnet18_ms', 'resnet18', 'resnet34', 'resnet50', 'resnet101', 'wideresnet50',
          'densenet121']         
 
