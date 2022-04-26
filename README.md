@@ -21,7 +21,8 @@
   cd wilds
   pip install -e .
   ```
-    ### Requirements
+
+  ### Requirements
   The WILDS package depends on the following requirements:
 
   - numpy>=1.19.1
