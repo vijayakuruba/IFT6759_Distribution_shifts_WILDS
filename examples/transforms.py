@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 
 
-from data_augmentation.randaugment import FIX_MATCH_AUGMENTATION_POOL, RandAugment
+from data_augmentation.strongaugment import FIX_MATCH_AUGMENTATION_POOL, StrongAugment
 from data_augmentation.cutout_augment.cutoutaugment import CutoutAugment
 from data_augmentation.weak_augment.weakaugment import WEAK_AUGMENTATION_POOL, WeakAugment
 
@@ -53,8 +53,8 @@ def initialize_transform(
                 config, dataset, transform_steps, default_normalization
             )
         transform = MultipleTransforms(transformations)
-    elif additional_transform_name == "randaugment":
-        transform = add_rand_augment_transform(
+    elif additional_transform_name == "strongaugment":
+        transform = add_strong_augment_transform(
                 config, dataset, transform_steps, default_normalization
             )
     elif additional_transform_name == "weak":
@@ -165,7 +165,7 @@ def add_weakenhanced_transform(config, dataset, base_transform_steps, normalizat
     )
     return transforms.Compose(weak_transform_steps)
 
-def add_rand_augment_transform(config, dataset, base_transform_steps, normalization):
+def add_strong_augment_transform(config, dataset, base_transform_steps, normalization):
     # Adapted from https://github.com/YBZh/Bridging_UDA_SSL
     target_resolution = _get_target_resolution(config, dataset)
     strong_transform_steps = copy.deepcopy(base_transform_steps)
@@ -175,7 +175,7 @@ def add_rand_augment_transform(config, dataset, base_transform_steps, normalizat
             transforms.RandomCrop(
                 size=target_resolution
             ),
-            RandAugment(
+            StrongAugment(
                 n=config.randaugment_n,
                 augmentation_pool=FIX_MATCH_AUGMENTATION_POOL,
             ),

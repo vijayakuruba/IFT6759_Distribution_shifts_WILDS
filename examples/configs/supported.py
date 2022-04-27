@@ -41,7 +41,7 @@ algorithms = ['ERM', 'deepCORAL', 'IRM']
 
 # See transforms.py
 transforms = ['image_base', 'image_resize', 'image_resize_and_center_crop']
-additional_transforms = ['randaugment', 'weak', 'cutout','weak+']
+additional_transforms = ['strongaugment', 'weak', 'cutout','weak+']
 
 # See models/initializer.py
 

@@ -232,9 +232,22 @@ def main():
         datasets[split]['dataset'] = full_dataset.get_subset(
             split,
             frac=config.frac,
-            frac_seed=config.frac_seed,
-            transform=transform,
-            do_transform_y = False)
+            #frac_seed=config.frac_seed,
+            transform=transform)
+            
+        # Uncomment to print/save indices of partial dataset
+        #x=datasets[split]['dataset']  
+        #if split == 'train':
+        #  df=pd.DataFrame(x.indices)  
+        #  df.to_csv('train.csv')
+        #if split == 'test':
+        #  df=pd.DataFrame(x.indices)  
+        #  df.to_csv('test_OOD.csv')
+        #if split == 'val':
+        #  df=pd.DataFrame(x.indices)  
+        #  df.to_csv('val_OOD.csv')  
+        #df=pd.DataFrame(x.indices)  
+        #df.to_csv('test_ID.csv')    
 
         if split == 'train':
             datasets[split]['loader'] = get_train_loader(
@@ -245,7 +258,7 @@ def main():
                 grouper=train_grouper,
                 distinct_groups=config.distinct_groups,
                 n_groups_per_batch=config.n_groups_per_batch,
-                mixcut=config.mixcut,
+                #mixcut=config.mixcut,
                 **config.loader_kwargs)
         else:
             datasets[split]['loader'] = get_eval_loader(

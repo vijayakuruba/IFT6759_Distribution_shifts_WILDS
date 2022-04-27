@@ -129,7 +129,7 @@ def _sample_uniform(a, b):
     return torch.empty(1).uniform_(a, b).item()
 
 
-class RandAugment:
+class StrongAugment:
     def __init__(self, n, augmentation_pool):
         assert n >= 1, "RandAugment N has to be a value greater than or equal to 1."
         self.n = n
