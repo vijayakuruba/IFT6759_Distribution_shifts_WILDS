@@ -258,7 +258,7 @@ def main():
                 grouper=train_grouper,
                 distinct_groups=config.distinct_groups,
                 n_groups_per_batch=config.n_groups_per_batch,
-                #mixcut=config.mixcut,
+                mixcut=config.mixcut,
                 **config.loader_kwargs)
         else:
             datasets[split]['loader'] = get_eval_loader(
