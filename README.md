@@ -1,4 +1,4 @@
-# IFT6759_Distribution_shifts_WILDS
+# IFT6759 - Distribution shifts in wilds - iwildcam
  Our IFT6759 course work project is based on the paper [WILDS: A Benchmark of in-the-Wild Distribution Shifts](https://arxiv.org/abs/2012.07421). We have reproduced results based on existing code and ran experiments with data augment techniques such as Strong, Weak, Cutout and Cutmix techniques along with using Resnet and Densenet model architectures.
  * The code in this repo is based on the following repo: [wilds](https://github.com/p-lambda/wilds)
  * To replicate the results, we suggest running the code on COLAB in the same way as in Run_Experiments.ipynb.
