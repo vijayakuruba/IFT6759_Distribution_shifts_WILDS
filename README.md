@@ -54,7 +54,7 @@ python examples/run_expt.py --dataset iwildcam --algorithm ERM --root_dir data
 python examples/run_expt.py --dataset iwildcam --algorithm deepCORAL --additional_train_transform cutout --root_dir data
 
 #with weak+ data augmentation
-python examples/run_expt.py --dataset iwildcam --algorithm deepCORAL --additional_train_transform weak+ --root_dir data
+python examples/run_expt.py --dataset iwildcam --algorithm deepCORAL --additional_train_transform weak --root_dir data
 
 #with cutmix data augmentation(with beta function parameters at 0.4)
 python examples/run_expt.py --dataset iwildcam --algorithm ERM --mixcut 0.4 --root_dir data
